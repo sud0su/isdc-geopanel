@@ -102,6 +102,7 @@ class IsdcPanel extends React.Component {
                         arrow={true}
                         trigger="mouseenter"
                         size="big"
+                        style={{"font-size":"12px"}}
                     >
                         <FloatingActionButton
                             mini={true}

@@ -1,1 +1,1 @@
-# iMMAP Panel Module
+# iMMAP GeoPanel Module

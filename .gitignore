@@ -7,7 +7,7 @@
 .vscode/
 
 node_modules/
-immap_panel_module.egg-info/
+isdc_geopanel.egg-info/
 dist/
 
 package-lock.json

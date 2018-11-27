@@ -1,5 +1,5 @@
-# FILE=VERSION
-# VERSION='cat $(FILE)'
+FILE=VERSION
+VERSION='cat $(FILE)'
 
 .PHONY: build immap package release
 
@@ -10,7 +10,7 @@ immap: build
 	npm run immap:deploy
 
 package: immap
-	python setup.py sdist
+	python setup.py sdist bdist_wheel
 
-# release: package
-	# twine upload dist/isdc-geopanel-$(VERSION).tar.gz
+release: package
+	twine upload dist/isdc-geopanel-$(VERSION).tar.gz
