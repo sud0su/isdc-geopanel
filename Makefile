@@ -1,5 +1,5 @@
 FILE=VERSION
-VERSION='cat $(FILE)'
+VERSION=`cat $(FILE)`
 
 .PHONY: build immap package release
 

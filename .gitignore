@@ -9,6 +9,7 @@
 node_modules/
 isdc_geopanel.egg-info/
 dist/
+build/
 
 package-lock.json
 __package.json_backup
