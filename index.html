@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+    <h1>Test Panel Custom</h1>
+    
+    <div id="newpanel" style="float: right;"></div>
+    
+    <script src="dist/panel.bundle.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            var config = [
+                {
+                    component: 'Statistic',
+                    icon: 'assignment'
+                },
+                {
+                    component: 'Findertool',
+                    icon: 'find_in_page'
+                }
+            ];
+            var options = {panelConfig: config};
+            var addPanel = new window.Panel('newpanel', options);
+            addPanel.panel();
+        });
+    </script>
+</body>
+</html>
