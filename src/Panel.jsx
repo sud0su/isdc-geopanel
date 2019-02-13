@@ -18,7 +18,7 @@ class Panel {
         this._addPackage = value;
     }
 
-    panel(){
+    _geopanel(){
         ReactDOM.render(
             <MuiThemeProvider>
                 <IsdcPanel

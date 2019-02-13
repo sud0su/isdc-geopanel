@@ -29,6 +29,6 @@ function addDiv(isdcPackage) {
     var package = isdcPackage[1].official_package;
     var options = {panelConfig: config, addPackage: package};
     var addPanel = new window.Panel('isdcpanel', options);
-    addPanel.panel();
+    addPanel._geopanel();
   }, 100);
 }

@@ -52,12 +52,21 @@ const styles = {
 };
 
 const items = [
-    <MenuItem key={1} value={1} primaryText="Never" />,
-    <MenuItem key={2} value={2} primaryText="Every Night" />,
-    <MenuItem key={3} value={3} primaryText="Weeknights" />,
-    <MenuItem key={4} value={4} primaryText="Weekends" />,
-    <MenuItem key={5} value={5} primaryText="Weekly" />,
+    <MenuItem value={null} primaryText="Select a settlement" />,
   ];
+
+function buildUrl(url, parameters) {
+    var qs = "";
+    for (var key in parameters) {
+        var value = parameters[key];
+        qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
+    }
+    if (qs.length > 0) {
+        qs = qs.substring(0, qs.length - 1); //chop off last "&"
+        url = url + "?" + qs;
+    }
+    return url;
+  }
 
 const projectionlist = [
     <MenuItem key={11} value={1} primaryText="Decimal Degree (WGS84)" />,
@@ -80,14 +89,139 @@ class Findertool extends React.Component {
             valueprojection: 1,
             pickFromMap: true,
             buttonPickFromMap: false,
-            buttonLabelPick : 'Pick from Map'
+            buttonLabelPick : 'Pick from Map',
+            prov: [],
+            dist: [],
         };
         this._pickFromMap = window.getFunction._pickFromMap;
         this._clearCoordinat = window.getFunction._clearCoordinat;
         this._plotToMap = window.getFunction._plotToMap;
+        this._selectProv = window.getFunction._selectedProv;
+        this._baseUrl = window.BASE_URL;
+        this._serverUrl = window.SERVER_URL;
     }
 
-    handleProv = (event, index, valueprov) => this.setState({valueprov});
+    _thisProv = () => {
+        const provUrl = this._serverUrl + 'geonode/wfs';
+        const params = {
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            typeName: 'geonode:afg_admbnda_adm1',
+            srsName: 'EPSG:900913',
+            outputFormat: 'json',
+            propertyName: 'prov_code,prov_na_en'
+        }
+        fetch(buildUrl(provUrl, params), {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Accept': '*/*',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Something wrong...");
+                }
+            })
+            .then(data => this.setState({ prov: data.features }))
+            .catch(error => console.log(error));
+    }
+
+    _jsonProv = (prov) => {
+        let provdata = [];
+        for (var i = 0; i < prov.length; i++) {
+            provdata[i] = {
+                'key': [i],
+                'value': prov[i].properties.prov_code,
+                'primaryText': prov[i].properties.prov_na_en
+            }
+        }
+        const itemsprov = [];
+        for(var j = 0; j < provdata.length; j++){
+            itemsprov.push(<MenuItem value={provdata[j].value} key={provdata[j].key} primaryText={provdata[j].primaryText} />);
+        }
+        return itemsprov
+    }
+
+    _District = (prov_id) => {
+        const provUrl = this._serverUrl + 'geonode/wfs';
+        const params = {
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            typeName: 'geonode:afg_admbnda_adm2',
+            srsName: 'EPSG:900913',
+            outputFormat: 'json',
+            CQL_FILTER: 'prov_code = '+prov_id
+        }
+        fetch(buildUrl(provUrl, params), {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Accept': '*/*',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Something wrong...");
+                }
+            })
+            .then(data => this.setState({ dist: data.features }))
+            .catch(error => console.log(error));
+    }
+
+    _jsonDist = (dist) => {
+        let distdata = [];
+        for (var i = 0; i < dist.length; i++) {
+            distdata[i] = {
+                'key': [i],
+                'value': dist[i].properties.dist_code,
+                'primaryText': dist[i].properties.dist_na_en
+            }
+        }
+        const itemsdist = [];
+        for(var j = 0; j < distdata.length; j++){
+            itemsdist.push(<MenuItem value={distdata[j].value} key={distdata[j].key} primaryText={distdata[j].primaryText} />);
+        }
+        return itemsdist
+    }
+
+    handleProv = (event, index, valueprov) => {
+        this.setState({valueprov});
+        const provUrl = this._serverUrl + 'geonode/wfs';
+        const params = {
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            typeName: 'geonode:afg_admbnda_adm1',
+            srsName: 'EPSG:900913',
+            outputFormat: 'json',
+            CQL_FILTER: 'prov_code = '+valueprov
+        }
+        fetch(buildUrl(provUrl, params), {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Accept': '*/*',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Something wrong...");
+                }
+            })
+            .then(data => this._selectProv(data.features))
+            // .then(data => this.setState({ dist: data.features }, ()=> console.log('dist', this.state.dist)))
+            .catch(error => console.log(error));
+    }
+    
 
     handleDist = (event, index, valuedist) => this.setState({valuedist});
 
@@ -128,23 +262,75 @@ class Findertool extends React.Component {
         this._plotToMap(this.state.valueprojection);
     }
 
+    _searchFuzzy = (findTab, event, newValue) => {
+        let tabType;
+        if(findTab === 0){
+            tabType = 'settlements'
+        } else if (findTab === 1){
+            tabType = 'healthfacility'
+        } else if (findTab === 2){
+            tabType = 'airport'
+        } else if (findTab === 3){
+            tabType = 's_oasis'
+        }
+        const provUrl = this._baseUrl + '/geoapi/get_villages';
+        const params = {
+            start: '0',
+            propertyName: '',
+            type: tabType,
+            dist_code: '',
+            prov_code: '',
+            search: newValue,
+            CQL_FILTER: "strToLowerCase(namelong) like '%"+newValue+"%'",
+            typeName: 'geonode:afg_airdrmp',
+            fuzzy: true,
+            distname: '',
+            provname: '',
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            srsName: 'EPSG:900913',
+            outputFormat: 'json',
+        }
+        fetch(buildUrl(provUrl, params), {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Accept': '*/*',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Something wrong...");
+                }
+            })
+            .then(data => console.log(data))
+            // .then(data => this.setState({ dist: data.features }, ()=> console.log('dist', this.state.dist)))
+            .catch(error => console.log(error));
+    }
+
     render() {
         const { handleClose } = this.props;
-        const { valueprojection, tabIndex, checked, findTab, buttonPickFromMap, buttonLabelPick } = this.state;
+        const { valueprojection, tabIndex, checked, findTab, buttonPickFromMap, buttonLabelPick, prov, dist } = this.state;
 
         const cardFinder = (
             <Card>
                 <div className={"boxTitle"}>
-                    <div className={"left"}>
+                    <div className={"geoleft"}>
                         <FontIcon className="material-icons" style={styles.iconBg}>find_in_page</FontIcon>
                     </div>
-                    <div className={"right"}>
+                    <div className={"georight"}>
                         <div className={"drawerName"}>Finder Tool</div>
                         <FontIcon onClick={handleClose} className={["material-icons","closeDrawer"].join(" ")}>arrow_left</FontIcon>
                     </div>
                 </div>                
             </Card>
         )
+
+        let dataProv = prov.length > 0 ? this._jsonProv(prov):this._thisProv();
+        // let dataDist = dist.length > 0 ? this._jsonDist(dist) : '';
 
         const selectField = (
             <Card>
@@ -166,7 +352,7 @@ class Findertool extends React.Component {
                                     maxHeight={300}
                                     fullWidth={true}
                                 >
-                                    {items}
+                                    {dataProv}
                                 </SelectField>
                             </div>
                             <div className={"clearfix"}></div>
@@ -189,7 +375,7 @@ class Findertool extends React.Component {
                                     maxHeight={300}
                                     fullWidth={true}
                                 >
-                                    {items}
+                                    {this._jsonDist(dist)}
                                 </SelectField>
                             </div>
                             <div className={"clearfix"}></div>
@@ -408,7 +594,7 @@ class Findertool extends React.Component {
         const findLocation = (
             <Tabs 
                 tabItemContainerStyle={styles.tabsColor} 
-                style={"boxFilter"} 
+                className={"boxFilter"} 
                 value={findTab}
                 onChange={this.handleChangeFindTab}
             >
@@ -514,6 +700,7 @@ class Findertool extends React.Component {
                                     inputStyle={{ fontSize: '13px' }}
                                     hintStyle={{ fontSize: '14px', fontWeight: 'bold', bottom: '0px' }}
                                     underlineStyle={{ borderBottom: '1px solid transparent'}}
+                                    onChange={this._searchFuzzy(findTab)}
                                 />
                             </div>
                             <div className={"optRight searchIconRight"}>

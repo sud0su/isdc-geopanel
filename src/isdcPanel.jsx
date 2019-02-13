@@ -14,17 +14,16 @@ import Inspector from './tools/Inspector'
 import FontIcon from 'material-ui/FontIcon'
 
 const drawerWidth = 350;
-
-const panel = {
+const geopanel = {
     drawerstyle: {
-        height: 'calc(100% - 72px)',
-        top: 72,
+        height: 'calc(100% - 64px)',
+        top: '64px',
         backgroundColor: 'rgb(245, 245, 245)'
     },
     rightbox :{
         boxShadow: 'none',
         borderRadius: '0',
-        backgroundColor: '#b71c1c',
+        backgroundColor: '#c62828',
         padding: '1px'
     }
 }
@@ -88,11 +87,15 @@ class IsdcPanel extends React.Component {
                 );
             } else {
                 IsdcComponent = (
-                    <Drawer openSecondary={false} open={this.state.drawer === config.component ? true : false} containerStyle={panel.drawerstyle} width={360}>
+                    <Drawer openSecondary={false} open={this.state.drawer === config.component ? true : false} containerStyle={geopanel.drawerstyle} width={360}>
                         <ComponentToRender handleClose={(e) => this.handleOpen(e, config.component)}/>
                     </Drawer>
                 );
             }
+
+            let buttonActive = this.state.activebutton === config.component ? true : false
+            let activeFontColor = buttonActive === true ? '#c62828' : '#ffffff'
+            let buttonColor = buttonActive === true ? '#ffffff' : '#c62828'
 
             return (
                 <div style={{'margin-left': this.state.move,'transition':'margin-left 450ms cubic-bezier(0.23, 1, 0.32, 1)'}}>
@@ -101,17 +104,16 @@ class IsdcPanel extends React.Component {
                         position="right"
                         arrow={true}
                         trigger="mouseenter"
-                        size="big"
-                        style={{"font-size":"12px"}}
                     >
                         <FloatingActionButton
                             mini={true}
                             onClick={(e) => this.handleOpen(e, config.component)}
-                            backgroundColor="#b71c1c"
-                            style={panel.rightbox}
-                            secondary={this.state.activebutton === config.component ? true : false}
+                            // backgroundColor="#c62828"
+                            backgroundColor={buttonColor}
+                            style={geopanel.rightbox}
+                            // secondary={this.state.activebutton === config.component ? true : false}
                         >
-                            <FontIcon className="material-icons">{config.icon}</FontIcon>
+                            <FontIcon className="material-icons" style={{ "color":activeFontColor }}>{config.icon}</FontIcon>
                         </FloatingActionButton>
                     </Tooltip>
                     {IsdcComponent}
@@ -120,7 +122,7 @@ class IsdcPanel extends React.Component {
         });
 
         return (
-            <div className={"boxshadow"}>
+            <div className="boxshadow">
                 {buttonPanel}
             </div>
         );

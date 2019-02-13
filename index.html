@@ -19,17 +19,19 @@
         document.addEventListener('DOMContentLoaded', function () {
             var config = [
                 {
-                    component: 'Statistic',
-                    icon: 'assignment'
+                    component: "Statistic",
+                    icon: "assignment",
+                    tooltip: "Statistics"
                 },
                 {
-                    component: 'Findertool',
-                    icon: 'find_in_page'
+                    component: 'Findertool',​​​​
+                    icon: "find_in_page",
+                    ​​​tooltip: "Finder Tool"
                 }
             ];
             var options = {panelConfig: config};
             var addPanel = new window.Panel('newpanel', options);
-            addPanel.panel();
+            addPanel._geopanel();
         });
     </script>
 </body>
