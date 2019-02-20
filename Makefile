@@ -12,5 +12,5 @@ immap: build
 package: immap
 	python setup.py sdist bdist_wheel
 
-release: package
-	twine upload dist/isdc-geopanel-$(VERSION).tar.gz
+# release: package
+# 	twine upload dist/isdc-geopanel-$(VERSION).tar.gz

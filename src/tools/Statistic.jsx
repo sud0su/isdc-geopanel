@@ -190,7 +190,7 @@ class Statisctic extends React.Component {
             // .then(data => this.setState({ dist: data.features }, ()=> console.log('dist', this.state.dist)))
             .catch(error => console.log(error));
         
-        this._selectProv(this.state.provID);
+        // this._selectProv(this.state.provID);
     }
     
     handleDist = (event, index, valuedist) => this.setState({valuedist});

@@ -700,7 +700,7 @@ class Findertool extends React.Component {
                                     inputStyle={{ fontSize: '13px' }}
                                     hintStyle={{ fontSize: '14px', fontWeight: 'bold', bottom: '0px' }}
                                     underlineStyle={{ borderBottom: '1px solid transparent'}}
-                                    onChange={this._searchFuzzy(findTab)}
+                                    // onChange={this._searchFuzzy(findTab)}
                                 />
                             </div>
                             <div className={"optRight searchIconRight"}>

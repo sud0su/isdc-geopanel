@@ -19,6 +19,19 @@ import { Tooltip, } from 'react-tippy'
 import FontIcon from 'material-ui/FontIcon'
 import '../../css/panel.css'
 
+function buildUrl(url, parameters) {
+    var qs = "";
+    for (var key in parameters) {
+        var value = parameters[key];
+        qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
+    }
+    if (qs.length > 0) {
+        qs = qs.substring(0, qs.length - 1); //chop off last "&"
+        url = url + "?" + qs;
+    }
+    return url;
+  }
+
 const styles = {
     marginCard: {
         marginTop: 8
@@ -69,8 +82,7 @@ const _valueTargetOfAcident = [
 ]
 
 let datalist, minDate, maxDate;
-let _typeData = [];
-let _targetData = [];
+let TypeSelected;
 
 class Humanitarian extends React.Component {
     constructor(props){
@@ -90,9 +102,15 @@ class Humanitarian extends React.Component {
             autoOk: true,
             expanded: false,
             prov_dist: true,
+            dist_prov: true,
             valueprov: null,
             valuedist: null,
-			error: null,
+            provID: null,
+            prov: [],
+            dist: [],
+            error: null,
+            _typeData: 'all',
+            _targetData: 'all',
 
             allrow: true,
             selectable: true,
@@ -100,10 +118,13 @@ class Humanitarian extends React.Component {
             deselectOnClickaway: false
         }
         
+        this._drawArea = window.getFunction._drawArea;
+        this._selectProv = window.getFunction._selectedProv;
+        this._serverUrl = window.SERVER_URL;
         this._targetData = '';
     }
     
-    handleProv = (event, index, valueprov) => this.setState({valueprov});
+    // handleProv = (event, index, valueprov) => this.setState({valueprov});
     handleDist = (event, index, valuedist) => this.setState({valuedist});
 
     handleChange = (event, filter) => {
@@ -115,11 +136,17 @@ class Humanitarian extends React.Component {
             this._drawArea(drawArea);
         }
         if(filter === 'ProvDist'){
-            this.setState({ prov_dist: false })
+            this.setState({ prov_dist: false });
+            this._thisProv();
         } else {
-            this.setState({ prov_dist: true })    
+            this.setState({ prov_dist: true });
+            this.setState({ dist_prov: true });
+            this.setState({ valuedist: null });
+            this.setState({ valueprov: null });
+            this.setState({ prov: [] });
+            this.setState({ dist: [] });
         }
-        this.setState({ filter: filter })
+        this.setState({ filter: filter });
     }
 
     _changeMinDate = (event, date) => {
@@ -131,45 +158,152 @@ class Humanitarian extends React.Component {
     }
     
     _selectTypeRow = (rows) => {
-        _typeData = [];
-        const typeArray = ['Abandonment/Defection', 'Arrest', 'Attack', 'Civilian accident', 'Demonstration', 'IED',
-            'Kidnapping', 'Military / Non-Military Operations', 'Murder/Execution', 'Others',
-            'Small Arms Fire (SAF)', 'UXO', 'Weapons'];
-
-        if (rows === 'all') {
-            _typeData.push('all');
-        } else {
-            for (var i = 0; i < rows.length; i++) {
-                for (var j = 0; j < typeArray.length; j++) {
-                    if (rows[i] === j) {
-                        _typeData.push(typeArray[j]);
-                    }
-                }
-            }
+        var result = rows.slice(0);
+        if (result == 'none') {
+            result = [];
         }
+        this.setState({ _typeData: result })
     }
     
     _selectTargetRow = (rows) => {
-        _targetData = [];
-        const targetArray = ['Armed Opposition Group','Civilians','Goverment','Humanitarian Community','Infrastructure',
-        'International Humanitarian Community','International Millitary','Police / Millitary Goverment','Unknown'];
+        var result = rows.slice(0);
+        if (result == 'none') {
+            result = [];
+        }
+        this.setState({ _targetData: result })
+    }
 
-        if (rows === 'all') {
-            _targetData.push('all');
-        } else {
-            for (var i = 0; i < rows.length; i++) {
-                for (var j = 0; j < targetArray.length; j++) {
-                    if (rows[i] === j) {
-                        _targetData.push(targetArray[j]);
-                    }
+    // areaofinterest
+    _thisProv = () => {
+        const provUrl = this._serverUrl + 'geonode/wfs';
+        const params = {
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            typeName: 'geonode:afg_admbnda_adm1',
+            srsName: 'EPSG:900913',
+            outputFormat: 'json',
+            propertyName: 'prov_code,prov_na_en'
+        }
+        fetch(buildUrl(provUrl, params), {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Accept': '*/*',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Something wrong...");
                 }
+            })
+            .then(data => this.setState({ prov: data.features }))
+            .catch(error => console.log(error));
+    }
+
+    _jsonProv = (prov) => {
+        let provdata = [];
+        for (var i = 0; i < prov.length; i++) {
+            provdata[i] = {
+                'key': [i],
+                'value': prov[i].properties.prov_code,
+                'primaryText': prov[i].properties.prov_na_en
             }
         }
+        const itemsprov = [];
+        for(var j = 0; j < provdata.length; j++){
+            itemsprov.push(<MenuItem value={provdata[j].value} key={provdata[j].key} primaryText={provdata[j].primaryText} />);
+        }
+        return itemsprov
     }
+
+    _District = (prov_id) => {
+        const provUrl = this._serverUrl + 'geonode/wfs';
+        const params = {
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            typeName: 'geonode:afg_admbnda_adm2',
+            srsName: 'EPSG:900913',
+            outputFormat: 'json',
+            CQL_FILTER: 'prov_code = '+prov_id
+        }
+        fetch(buildUrl(provUrl, params), {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Accept': '*/*',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Something wrong...");
+                }
+            })
+            .then(data => this.setState({ dist: data.features }))
+            .catch(error => console.log(error));
+    }
+
+    _jsonDist = (dist) => {
+        let distdata = [];
+        for (var i = 0; i < dist.length; i++) {
+            distdata[i] = {
+                'key': [i],
+                'value': dist[i].properties.dist_code,
+                'primaryText': dist[i].properties.dist_na_en
+            }
+        }
+        const itemsdist = [];
+        for(var j = 0; j < distdata.length; j++){
+            itemsdist.push(<MenuItem value={distdata[j].value} key={distdata[j].key} primaryText={distdata[j].primaryText} />);
+        }
+        return itemsdist
+    }
+
+    handleProv = (event, index, valueprov) => {
+        this.setState({dist_prov: false});
+        this.setState({valueprov});
+        this._District(valueprov);
+        const provUrl = this._serverUrl + 'geonode/wfs';
+        const params = {
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            typeName: 'geonode:afg_admbnda_adm1',
+            srsName: 'EPSG:900913',
+            outputFormat: 'json',
+            CQL_FILTER: 'prov_code = '+valueprov
+        }
+        fetch(buildUrl(provUrl, params), {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Accept': '*/*',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Something wrong...");
+                }
+            })
+            // .then(data => this._selectProv(data.features))
+            .then(data => this.setState({provID: data.features}))
+            // .then(data => this.setState({ dist: data.features }, ()=> console.log('dist', this.state.dist)))
+            .catch(error => console.log(error));
+        
+        // this._selectProv(this.state.provID);
+    }
+    // end of areaofinterest
 
     render() {
         const { handleClose } = this.props;
-        const { prov_dist, allrow, selectable, multiSelectable, deselectOnClickaway } = this.state;
+        const { prov_dist, dist_prov, prov, dist, allrow, selectable, multiSelectable, deselectOnClickaway, _typeData, _targetData } = this.state;
 
         const cardHumanitarian = (
             <Card>
@@ -248,7 +382,10 @@ class Humanitarian extends React.Component {
         )
         
         const tabtabData = (
-            <TabHumanitarian getMinDate={minDate} getMaxDate={maxDate} typeIncident={_typeData} targetIncident={_targetData}/>
+            <div>
+                {console.log('renderTypefromParent',_typeData,'+renderTargetfromParent', _targetData)}
+                <TabHumanitarian getMinDate={minDate} getMaxDate={maxDate} typeIncident={_typeData} targetIncident={_targetData}/>
+            </div>
         )
 
         const cardRadioButton = (
@@ -259,34 +396,33 @@ class Humanitarian extends React.Component {
                             label="Current Extent"
                             className={"drawerRadio"}
                             iconStyle={{ fill: '#b71d1b' }}
-                            // labelStyle={{color: '#b71d1b' }}
                         />
                         <RadioButton
                             value="entireAfg"
                             label="Entire Afghanistan"
                             className={"drawerRadio"}
                             iconStyle={{ fill: '#b71d1b' }}
-                            // labelStyle={{color: '#b71d1b' }}
                         />
                         <RadioButton
                             value="drawArea"
                             label="Draw Area"
                             className={"drawerRadio"}
                             iconStyle={{ fill: '#b71d1b' }}
-                            // labelStyle={{color: '#b71d1b' }}
                         />
                         <RadioButton
                             value="ProvDist"
                             label="Provinces and Districts"
                             className={"drawerRadio"}
                             iconStyle={{ fill: '#b71d1b' }}
-                            // labelStyle={{color: '#b71d1b' }}
                         />
                     </RadioButtonGroup>
             </div>
         )
 
         let overlay = prov_dist ? "boxOverlay" : "removeOverlay";
+        let dataProv = prov_dist === false && prov.length > 0 ? this._jsonProv(prov) : '';
+        let dataDist = dist_prov === false && dist.length > 0 ? this._jsonDist(dist) : '';
+
         const selectField = (
             <Card>
                 <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -309,7 +445,7 @@ class Humanitarian extends React.Component {
                                     fullWidth={true}
                                     disabled={prov_dist}
                                 >
-                                    {items}
+                                    {dataProv}
                                 </SelectField>
                             </div>
                             <div className={"clearfix"}></div>
@@ -333,7 +469,7 @@ class Humanitarian extends React.Component {
                                     fullWidth={true}
                                     disabled={prov_dist}
                                 >
-                                    {items}
+                                    {dataDist}
                                 </SelectField>
                             </div>
                             <div className={"clearfix"}></div>
@@ -372,7 +508,8 @@ class Humanitarian extends React.Component {
                         deselectOnClickaway={deselectOnClickaway}
                     >
                         {_valueTypeOfAcident.map((row, index) =>
-                            <TableRow key={index}>
+                            <TableRow key={index} selected={_typeData.indexOf(index) !== -1}>
+                                {console.log('typeindex',_typeData.indexOf(index))}
                                 <TableRowColumn>{row.data}</TableRowColumn>
                             </TableRow>
                         )}
@@ -405,7 +542,8 @@ class Humanitarian extends React.Component {
                         deselectOnClickaway={deselectOnClickaway}
                     >
                         {_valueTargetOfAcident.map((row, index) =>
-                            <TableRow key={index}>
+                            <TableRow key={index} selected={_targetData.indexOf(index) !== -1}>
+                            {console.log('targetindex',_targetData.indexOf(index))}
                                 <TableRowColumn>{row.data}</TableRowColumn>
                             </TableRow>
                         )}
