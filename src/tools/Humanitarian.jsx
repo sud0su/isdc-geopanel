@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card'
+import {Card, CardHeader, CardText} from 'material-ui/Card'
 
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton'
 import FlatButton from 'material-ui/FlatButton'
@@ -9,7 +9,7 @@ import DatePicker from 'material-ui/DatePicker'
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 
-import { Table,TableBody,TableFooter,TableHeader,TableHeaderColumn,TableRow,TableRowColumn, } from 'material-ui/Table';
+import { Table,TableBody,TableHeader,TableHeaderColumn,TableRow,TableRowColumn, } from 'material-ui/Table';
 import TabHumanitarian from './tabHumanitarian'
 //tooltip
 import 'react-tippy/dist/tippy.css'
@@ -117,13 +117,13 @@ class Humanitarian extends React.Component {
             multiSelectable: true,
             deselectOnClickaway: false
         }
-        
+
         this._drawArea = window.getFunction._drawArea;
         this._selectProv = window.getFunction._selectedProv;
         this._serverUrl = window.SERVER_URL;
         this._targetData = '';
     }
-    
+
     // handleProv = (event, index, valueprov) => this.setState({valueprov});
     handleDist = (event, index, valuedist) => this.setState({valuedist});
 
@@ -156,7 +156,7 @@ class Humanitarian extends React.Component {
     _changeMaxDate = (event, date) => {
         this.setState({maxDate: date})
     }
-    
+
     _selectTypeRow = (rows) => {
         var result = rows.slice(0);
         if (result == 'none') {
@@ -164,7 +164,7 @@ class Humanitarian extends React.Component {
         }
         this.setState({ _typeData: result })
     }
-    
+
     _selectTargetRow = (rows) => {
         var result = rows.slice(0);
         if (result == 'none') {
@@ -296,7 +296,7 @@ class Humanitarian extends React.Component {
             .then(data => this.setState({provID: data.features}))
             // .then(data => this.setState({ dist: data.features }, ()=> console.log('dist', this.state.dist)))
             .catch(error => console.log(error));
-        
+
         // this._selectProv(this.state.provID);
     }
     // end of areaofinterest
@@ -380,10 +380,9 @@ class Humanitarian extends React.Component {
                 </div>
             </Card>
         )
-        
+
         const tabtabData = (
             <div>
-                {console.log('renderTypefromParent',_typeData,'+renderTargetfromParent', _targetData)}
                 <TabHumanitarian getMinDate={minDate} getMaxDate={maxDate} typeIncident={_typeData} targetIncident={_targetData}/>
             </div>
         )
@@ -477,7 +476,7 @@ class Humanitarian extends React.Component {
                     </div>
                 </div>
             </Card>
-        ) 
+        )
 
         const ExpandAreaOfInterest = (
             <div>
@@ -509,14 +508,13 @@ class Humanitarian extends React.Component {
                     >
                         {_valueTypeOfAcident.map((row, index) =>
                             <TableRow key={index} selected={_typeData.indexOf(index) !== -1}>
-                                {console.log('typeindex',_typeData.indexOf(index))}
                                 <TableRowColumn>{row.data}</TableRowColumn>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
 
-                
+
             </div>
         );
 
@@ -543,7 +541,6 @@ class Humanitarian extends React.Component {
                     >
                         {_valueTargetOfAcident.map((row, index) =>
                             <TableRow key={index} selected={_targetData.indexOf(index) !== -1}>
-                            {console.log('targetindex',_targetData.indexOf(index))}
                                 <TableRowColumn>{row.data}</TableRowColumn>
                             </TableRow>
                         )}

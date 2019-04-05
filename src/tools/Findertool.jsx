@@ -1,16 +1,16 @@
 import React from 'react'
 
 // material ui components
-import {Card, CardHeader} from 'material-ui/Card'
+import {Card} from 'material-ui/Card'
 import {Tabs, Tab} from 'material-ui/Tabs'
-import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton'
+// import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 import Checkbox from 'material-ui/Checkbox'
 
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
-  
+
 // icon-material ui
 import FontIcon from 'material-ui/FontIcon'
 import '../../css/panel.css'
@@ -221,7 +221,7 @@ class Findertool extends React.Component {
             // .then(data => this.setState({ dist: data.features }, ()=> console.log('dist', this.state.dist)))
             .catch(error => console.log(error));
     }
-    
+
 
     handleDist = (event, index, valuedist) => this.setState({valuedist});
 
@@ -238,7 +238,7 @@ class Findertool extends React.Component {
     handleChangeFindTab = (value) => {
         this.setState({findTab: value});
     }
-    
+
     handlePickFromMap = () => {
         this.setState({ pickFromMap: !this.state.pickFromMap });
         this.setState({buttonPickFromMap: !this.state.buttonPickFromMap});
@@ -325,7 +325,7 @@ class Findertool extends React.Component {
                         <div className={"drawerName"}>Finder Tool</div>
                         <FontIcon onClick={handleClose} className={["material-icons","closeDrawer"].join(" ")}>arrow_left</FontIcon>
                     </div>
-                </div>                
+                </div>
             </Card>
         )
 
@@ -407,7 +407,7 @@ class Findertool extends React.Component {
                 </div>
             </Card>
         )
-        
+
         const decimalDegree = (
             <div className={"boxList"}>
                 <div className={"optLeft"} style={{ marginTop: '5px' }}>
@@ -451,11 +451,11 @@ class Findertool extends React.Component {
                         />'&nbsp;
                         <TextField
                             className={"inputTextDMS"}
-                            name="latS" 
+                            name="latS"
                             underlineFocusStyle={{ borderBottom: '2px solid rgb(183, 29, 27)' }}
-                        />" 
+                        />"
                     </div>
-                    
+
                     <div className={"labelCoordinat"}>
                         <label>Longitude</label>
                         <TextField
@@ -540,7 +540,7 @@ class Findertool extends React.Component {
                     />
                 </div>
                 <div className={"clearfix"}></div>
-            </div>   
+            </div>
         )
 
         let _inputCoordinat;
@@ -592,9 +592,9 @@ class Findertool extends React.Component {
         )
 
         const findLocation = (
-            <Tabs 
-                tabItemContainerStyle={styles.tabsColor} 
-                className={"boxFilter"} 
+            <Tabs
+                tabItemContainerStyle={styles.tabsColor}
+                className={"boxFilter"}
                 value={findTab}
                 onChange={this.handleChangeFindTab}
             >
@@ -674,7 +674,7 @@ class Findertool extends React.Component {
         let _inputSearchID;
         if( findTab === 0 || findTab === 3) {
             _inputSearchID = searchVillageId;
-        } 
+        }
 
         const searchName = (
             <Card>
@@ -685,7 +685,7 @@ class Findertool extends React.Component {
                                 <Checkbox
                                     style= {{ marginTop: '2px'}}
                                     labelStyle={{ fontSize: '13px', lineHeight: '20px' }}
-                                    label="Fuzzy" 
+                                    label="Fuzzy"
                                     checkedIcon={<FontIcon className="material-icons" style={{ fontSize: 18, marginRight: '0px', fill: "rgb(183, 29, 27)", color: "rgb(183, 29, 27)" }}>check_box</FontIcon>}
                                     uncheckedIcon={<FontIcon className="material-icons" style={{ fontSize: 18, marginRight: '0px', fill: "rgb(183, 29, 27)", color: "rgb(183, 29, 27)" }}>check_box_outline_blank</FontIcon>}
                                     iconStyle={{ marginRight: '0px'}}
@@ -694,9 +694,9 @@ class Findertool extends React.Component {
                                 />
                             </div>
                             <div className={"optRight searchRight"}>
-                                <TextField 
+                                <TextField
                                     style={{ height: '25px', width: '95%' }}
-                                    hintText="Search by Name" 
+                                    hintText="Search by Name"
                                     inputStyle={{ fontSize: '13px' }}
                                     hintStyle={{ fontSize: '14px', fontWeight: 'bold', bottom: '0px' }}
                                     underlineStyle={{ borderBottom: '1px solid transparent'}}
@@ -717,7 +717,7 @@ class Findertool extends React.Component {
         let tabBoxOutsideRed;
         if (tabIndex === 0){
             tabBoxOutsideRed = searchName;
-        } 
+        }
 
         const tabFinder = (
             <Card>
@@ -739,24 +739,24 @@ class Findertool extends React.Component {
                                 {getCoordinate}
                             </div>
 
-                            <RaisedButton 
-                                label="Plot to Map" 
-                                className={"butCoordinat"} 
+                            <RaisedButton
+                                label="Plot to Map"
+                                className={"butCoordinat"}
                                 labelStyle={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'capitalize', paddingRight: '8px'}}
                                 icon={<FontIcon className="material-icons" style={{ marginLeft: '5px' }}>map</FontIcon>}
                                 onClick={this.handlePLotToMap}
                             />
-                            <RaisedButton 
+                            <RaisedButton
                                 label={buttonLabelPick}
                                 secondary={buttonPickFromMap}
-                                className={"butCoordinat"}  
+                                className={"butCoordinat"}
                                 labelStyle={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'capitalize', paddingRight: '8px'}}
                                 icon={<FontIcon className="material-icons" style={{ marginLeft: '4px' }}>pin_drop</FontIcon>}
                                 onClick={this.handlePickFromMap}
                             />
-                            <RaisedButton 
-                                label="Clear" 
-                                className={"butCoordinat"}  
+                            <RaisedButton
+                                label="Clear"
+                                className={"butCoordinat"}
                                 labelStyle={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'capitalize', paddingRight: '8px'}}
                                 icon={<FontIcon className="material-icons" style={{ marginLeft: '4px' }}>clear_all</FontIcon>}
                                 onClick={this.handleClearCoordinat}
@@ -766,7 +766,7 @@ class Findertool extends React.Component {
                 </Tabs>
             </Card>
         )
-        
+
         return (
             <div>
                 <div className={"drawerBar"}>
@@ -779,7 +779,7 @@ class Findertool extends React.Component {
                     {tabBoxOutsideRed}
                 </div>
                 <div id="findertool"></div>
-                <div className={"immapcopy"}>&copy; <a href="http://immap.org/">iMMAP</a> Panel</div>
+                {/* <div className={"immapcopy"}>&copy; <a href="http://immap.org/">iMMAP</a> Panel</div> */}
             </div>
         );
     }

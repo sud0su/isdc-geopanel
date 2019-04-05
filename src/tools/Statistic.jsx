@@ -185,14 +185,16 @@ class Statisctic extends React.Component {
                     throw new Error("Something wrong...");
                 }
             })
-            // .then(data => this._selectProv(data.features))
-            .then(data => this.setState({provID: data.features}))
+            .then(data => {
+                this._selectProv(data.features);
+                this.setState({provID: data.features});
+            })
             // .then(data => this.setState({ dist: data.features }, ()=> console.log('dist', this.state.dist)))
             .catch(error => console.log(error));
-        
+
         // this._selectProv(this.state.provID);
     }
-    
+
     handleDist = (event, index, valuedist) => this.setState({valuedist});
 
     handleChange = (event, filter) => {
@@ -220,7 +222,7 @@ class Statisctic extends React.Component {
     render() {
         const { handleClose } = this.props;
         const { prov_dist, dist_prov, prov, dist } = this.state;
-        
+
         const cardRadioButton = (
             <div className={"boxOption"}>
                     <RadioButtonGroup name="filter" onChange={this.handleChange} valueSelected={this.state.filter}>
@@ -259,7 +261,7 @@ class Statisctic extends React.Component {
         let overlay = prov_dist ? "boxOverlay" : "removeOverlay";
         let dataProv = prov_dist === false && prov.length > 0 ? this._jsonProv(prov) : '';
         let dataDist = dist_prov === false && dist.length > 0 ? this._jsonDist(dist) : '';
-        
+
         const selectField = (
             <Card>
                 <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -352,7 +354,7 @@ class Statisctic extends React.Component {
                         </div>
                     </Card>
                 </div>
-                <div className={"immapcopy"}>&copy; <a href="http://immap.org/">iMMAP</a> Panel</div>
+                {/* <div className={"immapcopy"}>&copy; <a href="http://immap.org/">iMMAP</a> Panel</div> */}
             </div>
         );
     }

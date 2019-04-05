@@ -577,3 +577,14 @@ table.settlementTable td {
     font-weight: bold;
     color: black;
 }
+
+/* table security */
+.securitytable, .incidentTable {
+    font-size: 12px;
+}
+.securitytable td:first-child {
+    word-break: break-word;
+}
+.securitytable td, .securitytable th, .incidentTable td, .incidentTable th {
+    padding: 10px 5px;
+}

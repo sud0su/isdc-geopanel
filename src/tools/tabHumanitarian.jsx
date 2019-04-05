@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import {Tabs, Tab} from 'material-ui/Tabs'
 import Toggle from 'material-ui/Toggle'
+import RefreshIndicator from 'material-ui/RefreshIndicator'
 
-import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card'
+import {Card} from 'material-ui/Card'
 
 let datalist;
 const styles = {
@@ -34,14 +35,16 @@ class TabHumanitarian extends React.Component {
         super(props);
         this.state = {
             tabData: 'type',
+			isLoading: false,
+            error: null,
+            results: [],
+            toggleStatus: true
         }
         this._baseUrl = window.BASE_URL;
     }
 
     handleChangeData = (value) => {
         this.setState({ tabData: value });
-        console.log('propsType=',this.props.typeIncident,'+propsTarget=',this.props.targetIncident);
-
         let API_PATH;
         let formData = new URLSearchParams();
 
@@ -85,7 +88,6 @@ class TabHumanitarian extends React.Component {
         const targetArray = ['Armed Opposition Group','Civilians','Goverment','Humanitarian Community','Infrastructure',
         'International Humanitarian Community','International Millitary','Police / Millitary Goverment','Unknown'];
         if (this.props.targetIncident === 'all') {
-            // _getTargetData.push('all');
             formData.append('incident_target', '')
         } else {
             for (var i = 0; i < this.props.targetIncident.length; i++) {
@@ -115,17 +117,187 @@ class TabHumanitarian extends React.Component {
 					throw new Error('Something wrong ...');
 				}
 			})
-			// .then(data => this.setState({ results: [data.panels_list], isLoading: false }))
-			.then(function(data){console.log(data);})
-			.catch(error => this.setState({ error }));
+			.then(data => this.setState({ results: data, isLoading: false }))
+            .catch(error => this.setState({ error, isLoading: false }));
     };
 
+    tableType = (results) => {
+        const tblTitle = results.values_titles.map((items, index) => <td key={index} style={{ "font-weight":"bold" }}>{items}</td>)
+        const tblFooter =<Fragment>
+                <tr>
+                    <td style={{ "font-weight":"bold" }}>Total</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_incident }</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_dead }</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_injured }</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_violent }</td>
+                </tr>
+                <tr>
+                    <td colspan="5" style={{ "text-align":"center", "font-weight":"bold" }}>LAST UPDATED</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style={{ "font-weight":"bold" }}>Last incidents </td><td colspan="2">{ results.last_incidentdate }</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style={{ "font-weight":"bold" }}>Last synchronized </td><td colspan="2">{ results.last_incidentsync }</td>
+                </tr>
+            </Fragment>
+        const listChild = (listchild) => {
+            let getListChild = []
+            for(var j=0; j < listchild.length; j++){
+                getListChild.push(<td>{listchild[j]}</td>)
+            }
+            return getListChild
+        }
+        const childBody = (childs) => {
+            let childdata = [];
+            for(var i=0;i < childs.length; i++){
+                childdata.push(<tr>{listChild(childs[i])}</tr>)
+            }
+            return childdata
+        }
+        const tblBody = results.values.map((items) =>
+            <Fragment>
+                <tr><td colspan="5" style={{ "font-weight":"bold" }}>{items.title}</td></tr>
+                {childBody(items.values)}
+            </Fragment>
+        )
+        let template = <table class="securitytable">
+                            <thead>
+                                <tr><th colspan="5" style={{ "text-align":"center", "font-weight":"bold" }}>Type of Incidents</th></tr>
+                                <tr>{tblTitle}</tr>
+                            </thead>
+                            <tbody>
+                                {tblBody}
+                                {tblFooter}
+                            </tbody>
+                        </table>;
+        return template;
+    }
+
+    tableTarget = (results) => {
+        const tblTitle = results.values_titles.map((items, index) => <td key={index} style={{ "font-weight":"bold" }}>{items}</td>)
+        const tblFooter =<Fragment>
+                <tr>
+                    <td style={{ "font-weight":"bold" }}>Total</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_incident }</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_dead }</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_injured }</td>
+                    <td style={{ "font-weight":"bold" }}>{ results.total_violent }</td>
+                </tr>
+                <tr>
+                    <td colspan="5" style={{ "text-align":"center", "font-weight":"bold" }}>LAST UPDATED</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style={{ "font-weight":"bold" }}>Last incidents </td><td colspan="2">{ results.last_incidentdate }</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style={{ "font-weight":"bold" }}>Last synchronized </td><td colspan="2">{ results.last_incidentsync }</td>
+                </tr>
+            </Fragment>
+        const listChild = (listchild) => {
+            let getListChild = []
+            for(var j=0; j < listchild.length; j++){
+                getListChild.push(<td>{listchild[j]}</td>)
+            }
+            return getListChild
+        }
+        const childBody = (childs) => {
+            let childdata = [];
+            for(var i=0;i < childs.length; i++){
+                childdata.push(<tr>{listChild(childs[i])}</tr>)
+            }
+            return childdata
+        }
+        const tblBody = results.values.map((items) =>
+            <Fragment>
+                <tr><td colspan="5" style={{ "font-weight":"bold" }}>{items.title}</td></tr>
+                {childBody(items.values)}
+            </Fragment>
+        )
+        let template = <table class="securitytable">
+                            <thead>
+                                <tr><th colspan="5" style={{ "text-align":"center", "font-weight":"bold" }}>Target of Incidents</th></tr>
+                                <tr>{tblTitle}</tr>
+                            </thead>
+                            <tbody>
+                                {tblBody}
+                                {tblFooter}
+                            </tbody>
+                        </table>;
+        return template;
+    }
+
+    tableIncident = (results) => {
+        const tblTitle = results.values_titles.map((items, index) => <td key={index} style={{ "font-weight":"bold", "text-align":"center" }}>{items}</td>)
+        const tblFooter =<Fragment>
+                <tr>
+                    <td colspan="2" style={{ "text-align":"center", "font-weight":"bold" }}>LAST UPDATED</td>
+                </tr>
+                <tr>
+                    <td style={{ "font-weight":"bold" }}>Last incidents </td><td>{ results.last_incidentdate }</td>
+                </tr>
+                <tr>
+                    <td style={{ "font-weight":"bold" }}>Last synchronized </td><td>{ results.last_incidentsync }</td>
+                </tr>
+            </Fragment>
+
+        const tblBody = results.values.map((items, index) =>
+            <tr>
+                <td style={{ "font-weight":"bold", "vertical-align": "initial", "text-align":"center", "width":"110px" }}>{items[0]}</td>
+                <td style={{ "word-break": "break-word" }}>{items[1]}</td>
+            </tr>
+        )
+        let template = <table class="incidentTable">
+                            <thead>
+                                <tr><th colspan="2" style={{ "text-align":"center", "font-weight":"bold" }}>Incident list</th></tr>
+                                <tr>{tblTitle}</tr>
+                            </thead>
+                            <tbody>
+                                {tblBody}
+                                {tblFooter}
+                            </tbody>
+                        </table>;
+        return template;
+    }
+
+    _onToggle = (value) => {
+        console.log(value);
+        this.setState({ toggleStatus: !this.state.toggleStatus })
+        console.log(this.state.toggleStatus)
+    }
+
     render(){
-        const { tabData } = this.state;
-        
+        const { tabData, error, isLoading, results, toggleStatus } = this.state;
+
+        const loading = (
+			<div style={styles.container}>
+				<RefreshIndicator
+					loadingColor="rgb(0, 188, 212)"
+					size={40}
+					left={-20}
+					top={10}
+					status={'loading'}
+					style={{marginLeft: '50%'}}
+				/>
+			</div>
+        )
+
+		if (error) {
+			return <p>{error.message}</p>;
+        }
+
+        let AppendData;
+        if(tabData === 'type'){
+            AppendData = (results.length === 0) ? '<button>reload</button>' : this.tableType(results);
+        } else if(tabData === 'target'){
+            AppendData = (results.length === 0) ? '<button>reload</button>' : this.tableTarget(results);
+        } else if(tabData === 'incidents'){
+            AppendData = (results.length === 0) ? '<button>reload</button>' : this.tableIncident(results);
+        }
+        let humanitarianAccess = isLoading ? loading : AppendData;
+
         return(
             <div>
-
                 <div style={{"padding": "5px 15px 10px"}}>
                     <Toggle
                         label="Default data filter"
@@ -134,6 +306,8 @@ class TabHumanitarian extends React.Component {
                         thumbSwitchedStyle={styles.thumbSwitched}
                         trackSwitchedStyle={styles.trackSwitched}
                         labelStyle={styles.labelStyle}
+                        toggled={toggleStatus}
+                        onToggle={this._onToggle}
                     />
                 </div>
                 <Card>
@@ -145,17 +319,17 @@ class TabHumanitarian extends React.Component {
                 >
                     <Tab label="Type" value="type" className={"titleTabs"}>
                         <div>
-                            {datalist}
+                            {humanitarianAccess}
                         </div>
                     </Tab>
                     <Tab label="Target" value="target" className={"titleTabs"}>
                         <div>
-                            {datalist}
+                            {humanitarianAccess}
                         </div>
                     </Tab>
                     <Tab label="Incidents" value="incidents" className={"titleTabs"}>
                         <div>
-                            {datalist}
+                            {humanitarianAccess}
                         </div>
                     </Tab>
                 </Tabs>

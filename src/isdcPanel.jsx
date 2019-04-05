@@ -1,6 +1,6 @@
 import React from 'react'
 
-//material ui component 
+//material ui component
 import FloatingActionButton from 'material-ui/FloatingActionButton'
 import Drawer from 'material-ui/Drawer'
 
@@ -10,14 +10,17 @@ import { Tooltip, } from 'react-tippy'
 
 //panel components
 import Components from './Import'
-import Inspector from './tools/Inspector'
+// import Inspector from './tools/Inspector'
 import FontIcon from 'material-ui/FontIcon'
 
 const drawerWidth = 350;
 const geopanel = {
     drawerstyle: {
-        height: 'calc(100% - 64px)',
-        top: '64px',
+        // height: 'calc(100% - 64px)',
+        // top: '64px',
+        height: 'fit-content',
+        top: 'initial',
+        bottom: '0px',
         backgroundColor: 'rgb(245, 245, 245)'
     },
     rightbox :{
